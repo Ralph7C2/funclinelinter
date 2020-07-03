@@ -1,23 +1,24 @@
 package linter
 
 import (
+	"bytes"
 	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
 	"io"
-	"os"
+	"io/ioutil"
 )
 
 type linter struct {
 	fset *token.FileSet
-	out io.Writer
+	out  io.ReadWriter
 }
 
 func NewLinter() *linter {
 	return &linter{
 		fset: token.NewFileSet(),
-		out: os.Stdout,
+		out:  bytes.NewBuffer([]byte{}),
 	}
 }
 
@@ -109,6 +110,14 @@ func (l linter) handleFunction(name string, fnPos, paramsClosing token.Pos, star
 			return
 		}
 	}
+}
+
+func (l linter) Output() (string, error) {
+	buf, err := ioutil.ReadAll(l.out)
+	if err != nil {
+		return "", err
+	}
+	return string(buf), nil
 }
 
 func lengthError(name string) error {

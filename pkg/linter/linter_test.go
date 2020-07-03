@@ -298,7 +298,7 @@ func TestLinter_Lint(t *testing.T) {
 	buf := bytes.NewBuffer([]byte{})
 	linter := &linter{
 		fset: token.NewFileSet(),
-		out: buf,
+		out:  buf,
 	}
 	linter.Lint("./testdata/file.go")
 	types := []string{
