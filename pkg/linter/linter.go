@@ -58,7 +58,13 @@ func (l *linter) Lint(fileName string) {
 func (l linter) handleFunctionDefinition(fd *ast.FuncDecl) {
 	name := fd.Name.Name
 	if fd.Recv != nil {
-		name = fmt.Sprintf("%s.%s", fd.Recv.List[0].Type, name)
+		expr := fd.Recv.List[0].Type
+		if starExpr, ok := expr.(*ast.StarExpr); ok {
+			expr = starExpr.X
+		}
+		if ident, ok := expr.(*ast.Ident); ok {
+			name = fmt.Sprintf("%s.%s", ident.Name, name)
+		}
 	}
 	l.handleFunction(name, fd.Pos(), fd.Type.Params.Closing, nil)
 }
