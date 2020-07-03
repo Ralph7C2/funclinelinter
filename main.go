@@ -11,7 +11,9 @@ import (
 func main() {
 	l := linter.NewLinter()
 	flag.Parse()
+
 	fmt.Println(flag.Args())
+
 	for _, arg := range flag.Args() {
 		l.Lint(arg)
 		out, err := l.Output()
