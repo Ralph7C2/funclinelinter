@@ -97,7 +97,7 @@ func (l linter) handleFunction(name string, fnPos, paramsClosing token.Pos, star
 		length = int((tokenFile.LineStart(line+1) - 1) - tokenFile.LineStart(line))
 	}
 	if length > 120 {
-		fmt.Fprintln(l.out, lengthError(name))
+		fmt.Fprintln(l.out, lengthError(line, name))
 	}
 	tabAdjustment := 0
 	if startPos != nil {
@@ -106,7 +106,7 @@ func (l linter) handleFunction(name string, fnPos, paramsClosing token.Pos, star
 	lineEnd := tokenFile.Line(paramsClosing)
 	if line != lineEnd {
 		if int(tokenFile.LineStart(lineEnd))+tabAdjustment != int(paramsClosing) {
-			fmt.Fprintln(l.out, formatError(name))
+			fmt.Fprintln(l.out, formatError(line, name))
 			return
 		}
 	}
@@ -120,10 +120,10 @@ func (l linter) Output() (string, error) {
 	return string(buf), nil
 }
 
-func lengthError(name string) error {
-	return fmt.Errorf("function declaration too long: %s", name)
+func lengthError(line int, name string) error {
+	return fmt.Errorf("%d: function declaration too long: %s", line, name)
 }
 
-func formatError(name string) error {
-	return fmt.Errorf("params closing not at start of line: %s", name)
+func formatError(line int, name string) error {
+	return fmt.Errorf("%d: params closing not at start of line: %s", line, name)
 }
