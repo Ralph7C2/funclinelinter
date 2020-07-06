@@ -9,19 +9,28 @@ import (
 )
 
 func main() {
-	l := linter.NewLinter()
+	fix := flag.Bool("fix", false, "Try to fix lint errors")
 	flag.Parse()
 
+	l := linter.NewLinter()
+	action := func(string) {}
+	if *fix {
+		action = linter.Fix
+	} else {
+		action = l.Lint
+	}
 	for _, arg := range flag.Args() {
-		l.Lint(arg)
-		out, err := l.Output()
-		if err != nil {
-			fmt.Println("Error:", err)
-			os.Exit(1)
-		}
-		if len(out) != 0 {
-			fmt.Println(arg)
-			fmt.Println(out)
+		action(arg)
+		if !*fix {
+			out, err := l.Output()
+			if err != nil {
+				fmt.Println("Error:", err)
+				os.Exit(1)
+			}
+			if len(out) != 0 {
+				fmt.Println(arg)
+				fmt.Println(out)
+			}
 		}
 	}
 }
