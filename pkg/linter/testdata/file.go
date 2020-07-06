@@ -61,3 +61,12 @@ func goodFunction(
 ) (int, bool, string, thing) {
 	return 0, false, "", thing{}
 }
+
+type I interface {
+	longlyNamedInterfaceMethod(someParamWithAReallyLongName thing, more bool, and string, andyet int) (int, bool, string, thing)
+	wronglyFormattedInterfaceMethod(
+		someParamWithAReallyLongName thing, more bool, and string, andyet int) (int, bool, string, thing)
+	goodInterfaceMethod(
+		someParamWithAReallyLongName thing, more bool, and string, andyet int,
+	) (int, bool, string, thing)
+}

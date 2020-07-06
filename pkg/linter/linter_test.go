@@ -179,6 +179,60 @@ type x struct {
 	assert.Equal(t, fmt.Sprintf("%s\n", formatError(5, "x.funcWithReallyLongLine")), buf.String(), "output")
 }
 
+func TestInterfaceGood(t *testing.T) {
+	file := `
+package main
+
+type I interface {
+	funcWithReallyLongLine(
+		someParamWithAReallyLongName thing, more bool, and string, andyet int,
+	) (int, bool, string, thing)
+}
+`
+	linter, f, buf := parse(t, file)
+	obj := f.Scope.Lookup("I")
+	assert.NotNil(t, obj, "interface in objects")
+	assert.Equal(t, ast.Typ, obj.Kind, "ObjectKind is type")
+	ts := obj.Decl.(*ast.TypeSpec)
+	linter.handleTypeDefinition(ts)
+	assert.Equal(t, "", buf.String(), "output")
+}
+
+func TestInterfaceLongLine(t *testing.T) {
+	file := `
+package main
+
+type I interface {
+	funcWithReallyLongLine(someParamWithAReallyLongName thing, more bool, and string, andyet int) (int, bool, string, thing)
+}
+`
+	linter, f, buf := parse(t, file)
+	obj := f.Scope.Lookup("I")
+	assert.NotNil(t, obj, "interface in objects")
+	assert.Equal(t, ast.Typ, obj.Kind, "ObjectKind is type")
+	ts := obj.Decl.(*ast.TypeSpec)
+	linter.handleTypeDefinition(ts)
+	assert.Equal(t, fmt.Sprintf("%s\n", lengthError(5, "I.funcWithReallyLongLine")), buf.String(), "output")
+}
+
+func TestInterfaceWrongFormat(t *testing.T) {
+	file := `
+package main
+
+type I interface {
+	funcWithReallyLongLine(
+		someParamWithAReallyLongName thing, more bool, and string, andyet int) (int, bool, string, thing)
+}
+`
+	linter, f, buf := parse(t, file)
+	obj := f.Scope.Lookup("I")
+	assert.NotNil(t, obj, "interface in objects")
+	assert.Equal(t, ast.Typ, obj.Kind, "ObjectKind is type")
+	ts := obj.Decl.(*ast.TypeSpec)
+	linter.handleTypeDefinition(ts)
+	assert.Equal(t, fmt.Sprintf("%s\n", formatError(5, "I.funcWithReallyLongLine")), buf.String(), "output")
+}
+
 func TestVarFunctionTypeGood(t *testing.T) {
 	file := `
 package main
@@ -293,6 +347,7 @@ func (t *x) funcWithReallyLongLine(someParamWithAReallyLongName thing,
 	}
 	assert.Equal(t, fmt.Sprintf("%s\n", formatError(6, "x.funcWithReallyLongLine")), buf.String(), "output")
 }
+
 func TestLinter_Lint(t *testing.T) {
 	buf := bytes.NewBuffer([]byte{})
 	linter := &linter{
@@ -311,6 +366,8 @@ func TestLinter_Lint(t *testing.T) {
 		"41: params closing not at start of line: wronglyFormattedFunctionLiteral",
 		"51: function declaration too long: longlyNamedFunction",
 		"54: params closing not at start of line: wronglyFormattedFunction",
+		"66: function declaration too long: I.longlyNamedInterfaceMethod",
+		"67: params closing not at start of line: I.wronglyFormattedInterfaceMethod",
 	}
 	actualErrors := strings.Split(strings.TrimRight(buf.String(), "\n"), "\n")
 	assert.Len(t, actualErrors, len(expectedErrors))

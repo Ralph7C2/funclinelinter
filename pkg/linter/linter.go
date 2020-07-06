@@ -81,7 +81,14 @@ func (l linter) handleTypeDefinition(typ *ast.TypeSpec) {
 				l.handleFunction(fmt.Sprintf("%s.%s", typ.Name.Name, field.Names[0].Name), field.Pos(), ft.Params.Closing, &startPos)
 			}
 		}
-
+	}
+	if it, ok := typ.Type.(*ast.InterfaceType); ok {
+		for _, field := range it.Methods.List {
+			if ft, ok := field.Type.(*ast.FuncType); ok {
+				startPos := field.Pos()
+				l.handleFunction(fmt.Sprintf("%s.%s", typ.Name.Name, field.Names[0].Name), field.Pos(), ft.Params.Closing, &startPos)
+			}
+		}
 	}
 }
 
